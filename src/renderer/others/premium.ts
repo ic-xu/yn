@@ -133,7 +133,8 @@ export function getPurchased (force = false) {
     lastPurchased = val
   }
 
-  return val
+  // return val
+  return true
 }
 
 export function showPremium (tab?: PremiumTab) {
