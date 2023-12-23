@@ -124,6 +124,7 @@ function _getPurchased (force = false) {
 }
 
 export function getPurchased (force = false) {
+  return true
   const val = _getPurchased(force)
 
   if (typeof lastPurchased === 'boolean' && val !== lastPurchased) {
