@@ -105,6 +105,8 @@ const checkPrivateRepo = (ctx: any, repo: string) => {
 }
 
 const fileContent = async (ctx: any, next: any) => {
+  /// 查到用户边界的文件内容部分，这部分都是/API/file 开头的内容，具体格式为
+  /// http://localhost/api/file?path=/1、工作目录/14、录制服务/视频生成优化方案.md&repo=Markdown 文
   if (ctx.path === '/api/file') {
     if (ctx.method === 'GET') {
       const { repo, path, asBase64 } = ctx.query
@@ -173,20 +175,32 @@ const fileContent = async (ctx: any, next: any) => {
       ctx.body = result()
     }
   } else if (ctx.path === '/api/tree') {
+    /// 这里是查找左边目录树形结构的部分内容
+    /// 具体格式为
+    /// http://localhost/api/tree?repo=Markdown 文&sort=serial-asc
     const arr = (ctx.query.sort || '').split('-')
     const sort = { by: arr[0] || 'name', order: arr[1] || 'asc' }
     ctx.body = result('ok', 'success', (await file.tree(ctx.query.repo, sort)))
   } else if (ctx.path === '/api/history/list') {
+    /// 查找文档的历史记录部分内容
+    /// 具体格式为
+    ///  http://localhost/api/history/list?path=/1、工作目录/14、录制服务/视频生成优化方案.md&repo=Markdown 文
     ctx.body = result('ok', 'success', (await file.historyList(ctx.query.repo, ctx.query.path)))
   } else if (ctx.path === '/api/history/content') {
+    /// 这里应该是查找某一个目录的具体历史内容部分
+    /// 具体格式为
+    /// TODO
     ctx.body = result('ok', 'success', (await file.historyContent(ctx.query.repo, ctx.query.path, ctx.query.version)))
   } else if (ctx.path === '/api/history/delete') {
+    /// 删除具体的历史部分
     const { repo, path, version } = ctx.request.body
     ctx.body = result('ok', 'success', (await file.deleteHistoryVersion(repo, path, version)))
   } else if (ctx.path === '/api/history/comment') {
+    /// 具体的历史评论
     const { repo, path, version, msg } = ctx.request.body
     ctx.body = result('ok', 'success', (await file.commentHistoryVersion(repo, path, version, msg)))
   } else if (ctx.path === '/api/watch-file') {
+    /// 这里的内容是放在body 中的，具体要解析body为
     const { repo, path, options } = ctx.request.body
     ctx.body = await file.watchFile(repo, path, options)
   } else {
@@ -196,6 +210,7 @@ const fileContent = async (ctx: any, next: any) => {
 
 const attachment = async (ctx: any, next: any) => {
   if (ctx.path.startsWith('/api/attachment')) {
+    /// 查找文档附件内容的部分
     if (ctx.method === 'POST') {
       const path = ctx.request.body.path
       const repo = ctx.request.body.repo
@@ -218,6 +233,7 @@ const attachment = async (ctx: any, next: any) => {
 
 const searchFile = async (ctx: any, next: any) => {
   if (ctx.path.startsWith('/api/search') && ctx.method === 'POST') {
+    /// 查找文件内容的部分
     const query = ctx.request.body.query
     ctx.body = await search.search(query)
   } else {
@@ -227,6 +243,7 @@ const searchFile = async (ctx: any, next: any) => {
 
 const plantumlGen = async (ctx: any, next: any) => {
   if (ctx.path.startsWith('/api/plantuml')) {
+    /// 生成plantuml 图片的部分，具体查看后台内容
     try {
       const { type, content } = await plantuml(ctx.query.data)
       ctx.type = type
@@ -242,6 +259,7 @@ const plantumlGen = async (ctx: any, next: any) => {
 
 const runCode = async (ctx: any, next: any) => {
   if (ctx.path.startsWith('/api/run')) {
+    /// 运行代码部分内容翻到这里过来
     ctx.body = await run.runCode(ctx.request.body.cmd, ctx.request.body.code)
   } else {
     await next()
@@ -250,6 +268,7 @@ const runCode = async (ctx: any, next: any) => {
 
 const convertFile = async (ctx: any, next: any) => {
   if (ctx.path.startsWith('/api/convert/')) {
+    /// 转换文件内容
     const source = ctx.request.body.source
     const fromType = ctx.request.body.fromType
     const toType = ctx.request.body.toType
@@ -264,6 +283,7 @@ const convertFile = async (ctx: any, next: any) => {
 
 const tmpFile = async (ctx: any, next: any) => {
   if (ctx.path.startsWith('/api/tmp-file')) {
+    /// 临时文件部分内容
     const absPath = path.join(os.tmpdir(), APP_NAME + '-' + ctx.query.name.replace(/\//g, '_'))
     if (ctx.method === 'GET') {
       ctx.body = await fs.readFile(absPath)
@@ -602,6 +622,7 @@ const wrapper = async (ctx: any, next: any, fun: any) => {
 const server = (port = 3000) => {
   const app = new Koa()
 
+  /// 姐
   app.use(bodyParser({
     multipart: true,
     formLimit: '50mb',
@@ -631,10 +652,16 @@ const server = (port = 3000) => {
   app.use(async (ctx: any, next: any) => await wrapper(ctx, next, userFile))
   app.use(async (ctx: any, next: any) => await wrapper(ctx, next, rpc))
 
-  // static file
+  // static files
+  /// 这里发送的是静态文件的部分内容，这里的静态文件是打包编译之后产生的文件
+  /// 前端打包之后，直接放在了dist/renderer 目录下面，然后渲染进程直接获取这个目录之下的文件渲染
+  /// 本质上electron 和编写的页面进程也就是在这个时候进行关联操作的
+  /// 所以我们编写的文件，都是放在静态资源目录之下的，通过koa
   app.use(async (ctx: any, next: any) => {
     const urlPath = decodeURIComponent(ctx.path).replace(/^(\/static\/|\/)/, '')
-
+    /// 这里是查找静态文件的部分内容
+    /// 这应该是包含用户的js 、css 、图片等内容 HTML 等文件内容的部分
+    console.log('ctx.sendFile', path.resolve(STATIC_DIR, urlPath))
     if (!(await sendFile(ctx, next, path.resolve(STATIC_DIR, urlPath), false))) {
       await sendFile(ctx, next, path.resolve(USER_THEME_DIR, urlPath), true)
     }
@@ -642,6 +669,7 @@ const server = (port = 3000) => {
 
   const callback = app.callback()
 
+  /// 关闭启动http 服务，这里通过参数去控制是否启动http 服务
   if (FLAG_DISABLE_SERVER) {
     return { callback }
   }

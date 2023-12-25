@@ -2,6 +2,7 @@ import type { BuildInHookTypes } from '@fe/types'
 import { getLogger } from '@fe/utils'
 import * as ioc from './ioc'
 
+/// 这里暂时不清楚是干嘛的，先不管
 export type HookType = keyof BuildInHookTypes
 export type HookFun<T> = (arg: T) => (boolean | void | Promise<boolean | void>)
 

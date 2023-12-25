@@ -21,11 +21,15 @@ import { initProxy } from './proxy'
 import { initEnvs } from './envs'
 
 type WindowState = { maximized: boolean } & Rectangle
-
+/// 初始化代理
 initProxy()
+// 初始化环境变量
 initEnvs()
 
+/// electron 菜单
 const electronContextMenu = require('electron-context-menu')
+
+/// electron 渲染进程
 const electronRemote = require('@electron/remote/main')
 
 const isMacos = os.platform() === 'darwin'
@@ -51,6 +55,8 @@ electronContextMenu({
   showInspectElement: false,
   showServices: true,
 })
+
+///  设置应用菜单
 Menu.setApplicationMenu(getMainMenus())
 
 let fullscreen = false
@@ -96,8 +102,8 @@ const getUrl = (mode?: typeof urlMode) => {
 
   const proto = mode === 'scheme' ? APP_NAME : 'http'
   const port = proto === 'http' ? (mode === 'dev' ? devFrontendPort : backendPort) : ''
-
-  return `${proto}://localhost:${port}` + (query ? `?${query}` : '')
+  const url = `${proto}://localhost:${port}` + (query ? `?${query}` : '')
+  return url
 }
 
 const hideWindow = () => {
@@ -425,13 +431,14 @@ const toggleFullscreen = () => {
 const serve = () => {
   try {
     const { callback: handler, server } = httpServer(backendPort)
-
     if (server) {
       server.on('error', (e: Error) => {
         console.error(e)
 
         if (e.message.includes('EADDRINUSE') || e.message.includes('EACCES')) {
           // wait for electron app ready.
+
+          /// 这个函数只是调用一次，所以不用担心会重复调用
           setTimeout(async () => {
             await dialog.showMessageBox({
               type: 'error',
@@ -455,6 +462,7 @@ const serve = () => {
       const { req, res, out } = await transformProtocolRequest(request)
       ;(req as any)._protocol = true
 
+      /// 处理实际的koa请求体的内容的处理器
       await handler(req, res)
       callback({
         headers: res.getHeaders() as any,

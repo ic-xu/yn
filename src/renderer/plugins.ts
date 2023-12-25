@@ -69,6 +69,7 @@ import previewFontSize from '@fe/plugins/preview-font-size'
 import dropToOpenFile from '@fe/plugins/drop-to-open-file'
 import recordRecentDocument from '@fe/plugins/record-recent-document'
 
+/// 这个是给渲染进程使用的插件系统，一般不会影响到主进程应用
 export default [
   customStyles,
   customKeybindings,
