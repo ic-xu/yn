@@ -464,6 +464,7 @@ const serve = () => {
 
       /// 处理实际的koa请求体的内容的处理器
       await handler(req, res)
+      // eslint-disable-next-line n/no-callback-literal
       callback({
         headers: res.getHeaders() as any,
         statusCode: res.statusCode,
