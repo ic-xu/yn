@@ -661,7 +661,6 @@ const server = (port = 3000) => {
     const urlPath = decodeURIComponent(ctx.path).replace(/^(\/static\/|\/)/, '')
     /// 这里是查找静态文件的部分内容
     /// 这应该是包含用户的js 、css 、图片等内容 HTML 等文件内容的部分
-    console.log('ctx.sendFile', path.resolve(STATIC_DIR, urlPath))
     if (!(await sendFile(ctx, next, path.resolve(STATIC_DIR, urlPath), false))) {
       await sendFile(ctx, next, path.resolve(USER_THEME_DIR, urlPath), true)
     }

@@ -4,14 +4,17 @@
       <slot name="header"></slot>
     </div>
     <div class="main">
+      <!-- 左边的树形目录布局 -->
       <div class="left" ref="aside" v-show="showSide">
         <slot name="left"></slot>
         <div class="sash-right" @dblclick="resetSize('right', 'aside')" @mousedown="e => initResize('right', 'aside', 130, 700, e)"></div>
       </div>
+      <!-- 右边的主题，包含edit和preview 还有下面的终端 -->
       <div class="right">
         <div class="right-before">
           <slot name="right-before" />
         </div>
+         <!-- 主体内容部分，这部分包含 编辑部分 还有预览部分 -->
         <div class="content" ref="content">
           <div class="editor" ref="editor" v-show="showEditor">
             <slot name="editor"></slot>
@@ -21,6 +24,7 @@
             <slot name="preview"></slot>
           </div>
         </div>
+        <!-- 这部分主要是显示终端部分，终端工具 -->
         <div class="terminal" ref="terminal" v-show="showXterm">
           <slot name="terminal"></slot>
           <div class="sash-top" @dblclick="resetSize('top', 'terminal')" @mousedown="e => initResize('top', 'terminal', 70, 500, e)"></div>

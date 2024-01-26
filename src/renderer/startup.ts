@@ -28,7 +28,7 @@ import * as jsonrpc from '@fe/support/jsonrpc'
 import { getLogger } from '@fe/utils'
 
 const logger = getLogger('startup')
-
+/// 把所有的插件都初始化一遍，已备后续使用注册好的插件系统
 init(plugins, ctx)
 
 function getLastOpenFile (repoName?: string): Doc | null {

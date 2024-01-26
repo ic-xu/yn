@@ -1,3 +1,4 @@
+/// 用来描述TS 类型的一个全局申明文件，用来解决TS 在使用第三方库时，编译报错的问题
 declare module '*.vue' {
   import { DefineComponent } from 'vue'
   const component: DefineComponent<Record<string, unknown>, Record<string, unknown>, any>
