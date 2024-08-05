@@ -12,6 +12,7 @@ const data: BaseLanguage = {
   'demo-tips': 'DEMO 模式下一些功能不可用',
   'more': '更多',
   'copied': '已复制',
+  'others': '其他',
   'insert-different-repo-doc': '不能插入不同仓库的文档',
   'need-clipboard-permission': '请授予剪切板权限',
   'click-to-copy': '单击复制',
@@ -37,6 +38,14 @@ const data: BaseLanguage = {
   'learn-more': '了解更多',
   'default': '默认',
   'print': '打印',
+  'markdown-file': 'Markdown 文件',
+  'encrypted-markdown-file': '加密的 Markdown 文件',
+  'switch-repo-n': '切换到仓库 %s',
+  'switch-the-last-repo': '切换到最后一个仓库',
+  'edit-or-generate-text-using-ai': '使用 AI Copilot 编辑或生成文字',
+  'file-readonly-desc': '当前文件只读，如需编辑请先在系统中[改为可写](%s)，然后[刷新](%s)当前文档。',
+  'can-not-edit-this-file-type': '不能编辑此类型文件',
+  'read-only-mode-desc': '当前是只读模式，不可编辑',
   'premium': {
     'confetti': '彩色纸屑',
     'need-purchase': '[%s] 需要高级版',
@@ -48,7 +57,7 @@ const data: BaseLanguage = {
       'intro': '介绍',
       'current-plan': '当前版本',
       'included': '已包含',
-      'desc': 'Yank Note 是一款面向程序员的开源笔记应用，从 2018 年开始，一直在不断开发和更新。因为软件的开发和维护需要精力和资金，现推出付费高级版。如果你想支持我的开发工作，或需要使用高级版功能，可以选择购买高级版。',
+      'desc': 'Yank Note 是一款开源笔记应用，从 2018 年开始，一直在不断开发和更新。因为软件的开发和维护需要精力和资金，现推出付费高级版。如果你想支持我的开发工作，或需要使用高级版功能，可以选择购买高级版。',
       'free-desc': '满足大部分用户需求',
       'premium-desc': '更多高级功能',
       'free-list': '基础编辑功能\n图形嵌入\n运行代码片段\nHTML 小工具\n文档加密\n内置终端\n文档历史\n插件扩展',
@@ -178,13 +187,15 @@ const data: BaseLanguage = {
   },
   'document': {
     'current-path': '当前路径: %s',
+    'invalid-filename': '文件名不能包含以下字符: %s',
     'password-create': '[创建] 请输入密码',
     'password-save': '[保存] 请输入密码',
     'password-open': '[打开] 请输入密码',
     'wrong-password': '密码错误',
     'file-transform-error': '加密文件和非加密文件不能互相转换',
+    'custom-extension': '自定义扩展名',
     'create-dialog': {
-      'title': '创建文件（加密文件以 .c.md 结尾）',
+      'title': '创建文件',
       'hint': '文件名',
     },
     'create-dir-dialog': {
@@ -231,6 +242,7 @@ const data: BaseLanguage = {
     'nav': {
       'nav': '导航',
       'goto': '快速跳转',
+      'reveal-current-file-in-sidebar': '在侧栏中显示当前文件',
       'forward': '前进',
       'back': '后退',
     },
@@ -374,15 +386,18 @@ const data: BaseLanguage = {
         'line-numbers': '行号',
         'enable-preview': '开启预览 - 打开新文件使用临时标签，双击标签以更改',
         'font-family': '字体',
+        'font-ligatures': '字体连字',
         'complete-emoji': '自动补全 Emoji - 输入 : 时显示 Emoji 列表',
         'todo-with-time': '勾选待办事项时自动添加时间',
         'suggest-on-trigger-characters': '自动提示 - 输入提示符时显示提示。如果禁用，仍可使用 Ctrl+Space (取决于快捷键配置) 触发',
+        'sticky-scroll-enabled': '启用粘性滚动 - 当编辑器滚动时，固定显示文档标题等',
         'quick-suggestions': '快速提示 - 在输入文本时显示提示',
       },
       'render': {
         'md-html': '启用 HTML',
         'md-breaks': '将 \\n 转换为 &lt;br&gt;',
         'md-linkify': '自动将类似 URL 的文本转换为链接',
+        'md-wiki-links': '启用 Wiki 链接 - [[link]]',
         'md-typographer': '启用排版美化，如 (c) -> ©',
         'md-sup': '启用上标语法: 29^th^',
         'md-sub': '启用下标语法: H~2~O',
@@ -391,6 +406,10 @@ const data: BaseLanguage = {
         'multimd-rowspan': '[markdown-it-multimd-table]: 启用 rowspan 语法',
         'multimd-headerless': '[markdown-it-multimd-table]: 启用 headerless 语法',
         'multimd-multibody': '[markdown-it-multimd-table]: 启用 multibody 语法',
+      },
+      'view': {
+        'default-previewer-max-width': '预览区最大宽度',
+        'default-previewer-max-width-desc': '≤ 100 为百分比，> 100 为像素',
       },
       'theme': '主题',
       'language': '语言',
@@ -471,6 +490,10 @@ const data: BaseLanguage = {
     },
     'switch-editor': '切换编辑器',
     'default-editor': '默认编辑器',
+    'action-label': {
+      'reveal-current-file-in-os': '在系统中显示当前文件',
+      'refresh-current-document': '刷新当前文档',
+    },
   },
   'previewer': {
     'default-previewer': '默认预览器',
@@ -490,6 +513,7 @@ const data: BaseLanguage = {
   },
   'code-run': {
     'run': '运行',
+    'stop': '停止',
     'run-in-xterm-tips': '在终端中运行代码，%s + 单击不退出解释器',
     'run-in-xterm': '终端中运行',
     'running': '运行中……',
@@ -737,6 +761,11 @@ const data: BaseLanguage = {
     },
     'toast-no-more': '没有更多',
     'results': '%s 个匹配',
+  },
+  'view-context-menu': {
+    'copy-image': '复制图片',
+    'delete-image': '删除图片',
+    'open-in-new-tab': '在新标签页中打开',
   },
 }
 

@@ -1,8 +1,9 @@
+import buildInRenderers from '@fe/plugins/build-in-renderers'
 import customStyles from '@fe/plugins/custom-styles'
 import customKeybindings from '@fe/plugins/custom-keybindings'
 import electronZoom from '@fe/plugins/electron-zoom'
-import documentHistoryStack from '@fe/plugins/document-history-stack'
-import fileTreeContextMenu from '@fe/plugins/file-tree-context-menu'
+import historyStack from '@fe/plugins/history-stack'
+import fileTreeFunctions from '@fe/plugins/file-tree-functions'
 import statusBarSetting from '@fe/plugins/status-bar-setting'
 import statusBarRepositorySwitch from '@fe/plugins/status-bar-repository-switch'
 import statusBarView from '@fe/plugins/status-bar-view'
@@ -23,6 +24,7 @@ import editorPaste from '@fe/plugins/editor-paste'
 import editorAttachment from '@fe/plugins/editor-attachment'
 import editorMarkdown from '@fe/plugins/editor-markdown'
 import editorMdSyntax from '@fe/plugins/editor-md-syntax'
+import editorMdList from '@fe/plugins/editor-md-list'
 import editorWords from '@fe/plugins/editor-words'
 import editorPathCompletion from '@fe/plugins/editor-path-completion'
 import editorFolding from '@fe/plugins/editor-folding'
@@ -32,6 +34,7 @@ import switchTodo from '@fe/plugins/switch-todo'
 import imageViewer from '@fe/plugins/image-viewer'
 import emoji from '@fe/plugins/emoji'
 import getStarted from '@fe/plugins/get-started'
+import markdownWikiLinks from '@fe/plugins/markdown-wiki-links'
 import markdownHtml from '@fe/plugins/markdown-html'
 import markdownRenderVnode from '@fe/plugins/markdown-render-vnode'
 import markdownMacro from '@fe/plugins/markdown-macro'
@@ -61,6 +64,7 @@ import markdownGithubAlerts from '@fe/plugins/markdown-github-alerts'
 import markdownMisc from '@fe/plugins/misc'
 import syncScroll from '@fe/plugins/sync-scroll'
 import imageLocalization from '@fe/plugins/image-localization'
+import viewImageContextMenus from '@fe/plugins/view-image-context-menus'
 import imageHostingPicgo from '@fe/plugins/image-hosting-picgo'
 import copyContent from '@fe/plugins/copy-content'
 import sharePreview from '@fe/plugins/share-preview'
@@ -69,14 +73,16 @@ import watchFileRefresh from '@fe/plugins/watch-file-refresh'
 import previewFontSize from '@fe/plugins/preview-font-size'
 import dropToOpenFile from '@fe/plugins/drop-to-open-file'
 import recordRecentDocument from '@fe/plugins/record-recent-document'
+import aiCopilot from '@fe/plugins/ai-copilot'
 
 /// 这个是给渲染进程使用的插件系统，一般不会影响到主进程应用
 export default [
+  buildInRenderers,
   customStyles,
   customKeybindings,
   electronZoom,
-  documentHistoryStack,
-  fileTreeContextMenu,
+  historyStack,
+  fileTreeFunctions,
   statusBarSetting,
   statusBarRepositorySwitch,
   statusBarView,
@@ -97,6 +103,7 @@ export default [
   editorAttachment,
   editorMarkdown,
   editorMdSyntax,
+  editorMdList,
   editorWords,
   editorPathCompletion,
   editorFolding,
@@ -106,6 +113,7 @@ export default [
   imageViewer,
   emoji,
   getStarted,
+  markdownWikiLinks,
   markdownHtml,
   markdownRenderVnode,
   markdownMacro,
@@ -134,6 +142,7 @@ export default [
   markdownMisc,
   syncScroll,
   imageLocalization,
+  viewImageContextMenus,
   imageHostingPicgo,
   copyContent,
   sharePreview,
@@ -143,4 +152,5 @@ export default [
   dropToOpenFile,
   recordRecentDocument,
   markdownGithubAlerts,
+  aiCopilot,
 ]

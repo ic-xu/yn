@@ -76,16 +76,16 @@ For more information on how to use the following functions, please see [characte
 
 ## Changelogs
 
-### [v3.66.1](https://github.com/purocean/yn/releases/tag/v3.66.1) 2024-01-11
+### [v3.75.1](https://github.com/purocean/yn/releases/tag/v3.75.1) 2024-07-23
 
-[Windows](https://github.com/purocean/yn/releases/download/v3.66.1/Yank-Note-win-x64-3.66.1.exe) | [macOS arm64](https://github.com/purocean/yn/releases/download/v3.66.1/Yank-Note-mac-arm64-3.66.1.dmg) | [macOS x64](https://github.com/purocean/yn/releases/download/v3.66.1/Yank-Note-mac-x64-3.66.1.dmg) | [Linux AppImage](https://github.com/purocean/yn/releases/download/v3.66.1/Yank-Note-linux-x86_64-3.66.1.AppImage) | [Linux deb](https://github.com/purocean/yn/releases/download/v3.66.1/Yank-Note-linux-amd64-3.66.1.deb)
+[Windows](https://github.com/purocean/yn/releases/download/v3.75.1/Yank-Note-win-x64-3.75.1.exe) | [macOS arm64](https://github.com/purocean/yn/releases/download/v3.75.1/Yank-Note-mac-arm64-3.75.1.dmg) | [macOS x64](https://github.com/purocean/yn/releases/download/v3.75.1/Yank-Note-mac-x64-3.75.1.dmg) | [Linux AppImage](https://github.com/purocean/yn/releases/download/v3.75.1/Yank-Note-linux-x86_64-3.75.1.AppImage) | [Linux deb](https://github.com/purocean/yn/releases/download/v3.75.1/Yank-Note-linux-amd64-3.75.1.deb)
 
-1. feat: Support [Github-style warning prompts](https://github.com/orgs/community/discussions/16925)
-2. feat: Support displaying open windows in the Dock menu on macOS
-3. feat: Support rendering PlantUML using code blocks
-4. fix: Fix the issue of abnormal line number display when the code block exceeds 100 lines
-5. fix: Fix the issue of not being able to jump to the corresponding position in the preview area after selecting text in the editor
-6. feat(plugin): Custom editor supports defining using classes
+1. feat: Add option to create custom file extensions in the file panel creation
+2. feat: Support for editing `.gitignore` files
+3. feat: Support for pasting webp images
+4. feat: Experience optimization, add prompt for editing read-only files
+5. feat: Experience optimization, adjust the position of the "Duplicate Files" menu
+6. fix(plugin): Fix the handling of the `Request` object in `ctx.api.proxyFetch`
 
 [More release notes](https://github.com/purocean/yn/releases)
 

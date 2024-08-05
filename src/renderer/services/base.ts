@@ -3,7 +3,7 @@ import filenamify from 'filenamify/browser'
 import type { Doc, FindInRepositoryQuery } from '@fe/types'
 import * as api from '@fe/support/api'
 import { FLAG_DEMO, HELP_REPO_NAME } from '@fe/support/args'
-import { binMd5, quote, fileToBase64URL, getLogger, removeQuery } from '@fe/utils'
+import { binMd5, quote, fileToBase64URL, getLogger } from '@fe/utils'
 import { basename, resolve, extname, dirname, relative, isBelongTo } from '@fe/utils/path'
 import { dayjs } from '@fe/context/lib'
 import { useModal } from '@fe/support/ui/modal'
@@ -27,13 +27,12 @@ export function getAttachmentURL (doc: Doc, opts: { origin: boolean } = { origin
     throw new Error('Document type must be file')
   }
 
-  const fileName = removeQuery(doc.name)
   const repo = doc.repo
-  const filePath = doc.path
+  const filePath = resolve(doc.path)
 
   const uri = repo === HELP_REPO_NAME
     ? `/api/help/file?path=${encodeURIComponent(filePath)}`
-    : `/api/attachment/${encodeURIComponent(fileName)}?repo=${repo}&path=${encodeURIComponent(filePath)}`
+    : `/api/attachment/${encodeURIComponent(repo)}${encodeURI(filePath)}`
 
   if (opts.origin) {
     return `${window.location.origin}${uri}`
@@ -60,10 +59,11 @@ export async function upload (file: File, belongDoc: Pick<Doc, 'repo' | 'path'>,
   const parentName = basename(belongDoc.path)
   const parentPath = dirname(belongDoc.path)
   const assetsPathType = getSetting('assets.path-type', 'auto')
+  const parentNameWithoutMdExt = parentName.replace(/\.md$/i, '')
   const assetsDir = getSetting('assets-dir', './FILES/{docName}')
-    .replaceAll('{docSlug}', parentName.startsWith('.') ? 'upload' : slugify(parentName))
+    .replaceAll('{docSlug}', parentName.startsWith('.') ? 'upload' : slugify(parentNameWithoutMdExt))
     .replaceAll('{docName}', parentName.startsWith('.') ? 'upload' : filenamify(parentName))
-    .replaceAll('{docBasename}', parentName.startsWith('.') ? 'upload' : filenamify(parentName).replace(/\.md$/i, ''))
+    .replaceAll('{docBasename}', parentName.startsWith('.') ? 'upload' : filenamify(parentNameWithoutMdExt))
     .replaceAll('{date}', dayjs().format('YYYY-MM-DD'))
 
   const path: string = resolve(parentPath, assetsDir, filename)
@@ -234,7 +234,7 @@ export async function writeToClipboard (type: string, value: any) {
  * @returns timestamp in ms
  */
 export async function getServerTimestamp () {
-  const date = (await api.proxyRequest('https://www.baidu.com/')).headers.get('x-origin-date')
+  const date = (await api.proxyFetch('https://www.baidu.com/')).headers.get('x-origin-date')
   return dayjs(date || undefined).valueOf()
 }
 

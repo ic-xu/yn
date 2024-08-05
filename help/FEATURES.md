@@ -69,6 +69,7 @@ Type '/' in the editor to get prompts
     *[HTML]: Hyper Text Markup Language
     *[W3C]:  World Wide Web Consortium
     The HTML specification is maintained by the W3C.
++ Wiki Link: Supports using `[[filename#anchor|display text]]` or `[[filename:line,column|display text]]` syntax to link documents, such as [[README#Highlights|Features]] [[README:3,4]]
 
 ## Github Alerts
 
@@ -284,12 +285,25 @@ Support to run `JavaScript` `PHP` `nodejs` `Python` `bash` `bat` code.
 This function is implemented by executing external commands, so the corresponding environment needs to be installed.
 
 The first line of the code block needs to contain the string `--run--`, an example is as follows
+
+The JS code runs in a Web Worker by default. If you need to run it in the main thread, you can add the `--no-worker--` parameter after the code block.
+
 ```js
 // --run--
+await new Promise(r => setTimeout(r, 500))
+console.log('HELLOWORLD')
+```
+
+The code running in the main thread supports accessing the editor API using the `ctx` object, as shown in the following example.
+
+```js
+// --run-- --no-worker--
 await new Promise(r => setTimeout(r, 500))
 ctx.ui.useToast().show("info", "HELLOWORLD!")
 console.log('HELLOWORLD')
 ```
+
+If HTML output is required, the `--output-html--` parameter can be added after the code block.
 
 ```js
 // --run-- --output-html--
@@ -398,6 +412,8 @@ If there is no title, there will be no outer border decoration
 <!-- --applet--  -->
 <button onclick="ctx.ui.useToast().show(`info`, `HELLOWORLD!`)">HELLO</button>
 ```
+
+You can also *<a href="javascript: ctx.showExtensionManager('@yank-note/extension-repl')">install and activate the Vue Repl extension</a>* to write applet using Vue SFC.
 
 ## ECharts
 
@@ -511,7 +527,7 @@ Support functions similiar to [VuePress Container Block](https://v2.vuepress.vue
 
 `type` is required, `title` and `content` are optional.
 
-The supported `types` are: tip, warning, danger, details, group, group-item, row, col, section, div
+The supported `types` are: tip, warning, danger, details, code-group, group, group-item, row, col, section, div
 
 **Example**
 
@@ -553,6 +569,17 @@ Title starts with `*` mean that this tab is activated by default
 test 3
 :::
 ::::
+
+::: code-group
+```js [test.js]
+let a = 1
+```
+
+```ts [test.ts]
+let a: number = 1
+```
+:::
+
 
 ::::: row Columns
 :::: col TODO

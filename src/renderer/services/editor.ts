@@ -1,6 +1,5 @@
 import type * as Monaco from 'monaco-editor'
 import { cloneDeep, debounce } from 'lodash-es'
-import { FLAG_READONLY } from '@fe/support/args'
 import { isElectron, isMacOS } from '@fe/support/env'
 import { registerHook, triggerHook } from '@fe/core/hook'
 import { getActionHandler, registerAction } from '@fe/core/action'
@@ -20,6 +19,13 @@ export type SimpleCompletionItem = {
   kind?: Monaco.languages.CompletionItemKind,
   insertText: string,
   detail?: string,
+  block?: boolean, // block completion
+  command?: {
+    id: string;
+    title: string;
+    tooltip?: string;
+    arguments?: any[];
+  }
 }
 
 export type SimpleCompletionItemTappers = (items: SimpleCompletionItem[]) => void
@@ -72,7 +78,6 @@ export const getDefaultOptions = (): Monaco.editor.IStandaloneEditorConstruction
     vertical: 'hidden',
     verticalScrollbarSize: 0
   } : undefined,
-  readOnly: FLAG_READONLY,
   acceptSuggestionOnEnter: 'smart',
   unicodeHighlight: {
     ambiguousCharacters: false,
@@ -88,8 +93,11 @@ export const getDefaultOptions = (): Monaco.editor.IStandaloneEditorConstruction
   lineNumbers: getSetting('editor.line-numbers', 'on'),
   quickSuggestions: getSetting('editor.quick-suggestions', false),
   suggestOnTriggerCharacters: getSetting('editor.suggest-on-trigger-characters', true),
-  occurrencesHighlight: false,
+  occurrencesHighlight: 'off',
   renderLineHighlight: 'all',
+  stickyScroll: { enabled: getSetting('editor.sticky-scroll-enabled', true) },
+  lightbulb: { enabled: 'on' as any },
+  fontLigatures: getSetting('editor.font-ligatures', false),
   wordSeparators: '`~!@#$%^&*()-=+[{]}\\|;:\'",.<>/?。？！，、；：“”‘’（）《》〈〉【】『』「」﹃﹄〔〕'
 })
 
@@ -116,9 +124,7 @@ export function getEditor () {
  * @param duration
  * @returns dispose function
  */
-export function highlightLine (line: number | [number, number], reveal: boolean, duration: number): Promise<void>
-export function highlightLine (line: number | [number, number], reveal?: boolean, duration?: number): (() => void) | Promise<void>
-export function highlightLine (line: number | [number, number], reveal?: boolean, duration?: number): (() => void) | Promise<void> {
+export function highlightLine (line: number | [number, number], reveal?: boolean, duration: number = 1000): (() => void) | Promise<void> {
   const lines = Array.isArray(line) ? line : [line, line]
 
   const decorations = getEditor().createDecorationsCollection([
@@ -527,6 +533,8 @@ registerHook('MONACO_BEFORE_INIT', ({ monaco }) => {
       lang.aliases?.push('node')
     } else if (lang.id === 'shell') {
       lang.aliases?.push('bash')
+    } else if (lang.id === 'html') {
+      lang.aliases?.push('vue')
     }
   })
 

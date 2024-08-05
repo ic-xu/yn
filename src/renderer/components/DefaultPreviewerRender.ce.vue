@@ -1,5 +1,5 @@
 <template>
-  <div :class="{'markdown-view': true, presentation}">
+  <div :class="{'markdown-view': true, presentation}" :style="{'--markdown-body-max-width': markdownBodyMaxWidth}">
     <article ref="refView" class="markdown-body" @dblclick.capture="handleDbClick" @click.capture="handleClick" @contextmenu.capture="handleContextMenu">
       <Render :content="renderContent" />
     </article>
@@ -9,13 +9,13 @@
 <script lang="ts" setup>
 import { debounce } from 'lodash-es'
 import { computed, defineComponent, h, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
-import { isElectron } from '@fe/support/env'
-import { markdown } from '@fe/services/markdown'
-import { triggerHook } from '@fe/core/hook'
+import { triggerHook, registerHook, removeHook } from '@fe/core/hook'
 import { registerAction, removeAction } from '@fe/core/action'
 import { CtrlCmd } from '@fe/core/keybinding'
-import { toUri, isMarkdownFile, isOutOfRepo } from '@fe/services/document'
+import { toUri, isOutOfRepo } from '@fe/services/document'
+import * as renderer from '@fe/services/renderer'
 import { getContextMenuItems, getRenderIframe, scrollTopTo } from '@fe/services/view'
+import { getSetting } from '@fe/services/setting'
 import { useContextMenu } from '@fe/support/ui/context-menu'
 import { DOM_ATTR_NAME } from '@fe/support/args'
 import { getLogger, sleep } from '@fe/utils'
@@ -53,6 +53,8 @@ const fileUri = computed(() => toUri(currentFile.value))
 const refView = ref<HTMLElement | null>(null)
 const renderContent = ref()
 
+const markdownBodyMaxWidth = ref(getMarkdownBodyMaxWidth())
+
 let renderCount = 0
 let renderEnv: RenderEnv | null = null
 let updateRender = debounce(render, 25)
@@ -80,12 +82,7 @@ async function render (checkInComposition = false) {
     updateRender = debounce(render, 25)
   }
 
-  let content = currentContent.value
-
-  if (currentFile.value && !isMarkdownFile(currentFile.value)) {
-    content = `## ${currentFile.value.name} \n *Not a markdown file.*`
-    currentFile.value.name
-  }
+  const content = currentContent.value
 
   const file = currentFile.value || null
   const safeMode = isOutOfRepo(file) // enable safe mode for root repo
@@ -93,7 +90,7 @@ async function render (checkInComposition = false) {
   const startTime = performance.now()
   renderEnv = { tokens: [], source: content, file, renderCount, safeMode }
   try {
-    renderContent.value = markdown.render(content, renderEnv)
+    renderContent.value = renderer.render(content, renderEnv)
   } catch (error: any) {
     logger.error('render', error)
     renderContent.value = h('div', [
@@ -132,25 +129,21 @@ function handleClick (e: MouseEvent) {
 }
 
 function handleContextMenu (e: MouseEvent) {
-  const tagName = (e.target as HTMLElement).tagName
-  const allowTags = ['TD', 'TH']
-  if (isElectron || e.altKey || allowTags.includes(tagName)) {
-    const contextMenuItems = getContextMenuItems(e)
-    if (contextMenuItems.length > 0) {
-      e.stopPropagation()
-      e.preventDefault()
+  const contextMenuItems = getContextMenuItems(e)
+  if (contextMenuItems.length > 0) {
+    e.stopPropagation()
+    e.preventDefault()
 
-      const clientX = e.clientX
-      const clientY = e.clientY
+    const clientX = e.clientX
+    const clientY = e.clientY
 
-      getRenderIframe().then((iframe) => {
-        const iframeRect = iframe.getBoundingClientRect()
-        useContextMenu().show(contextMenuItems, {
-          mouseX: iframeRect.left + clientX,
-          mouseY: iframeRect.top + clientY,
-        })
+    getRenderIframe().then((iframe) => {
+      const iframeRect = iframe.getBoundingClientRect()
+      useContextMenu().show(contextMenuItems, {
+        mouseX: iframeRect.left + clientX,
+        mouseY: iframeRect.top + clientY,
       })
-    }
+    })
   }
 }
 
@@ -231,6 +224,23 @@ async function refresh () {
   triggerHook('VIEW_AFTER_REFRESH')
 }
 
+function getMarkdownBodyMaxWidth () {
+  const val = getSetting('view.default-previewer-max-width', 1024)
+  if (val < 10) {
+    return '1024px'
+  }
+
+  if (val <= 100) {
+    return `${val}%`
+  }
+
+  return `${val}px`
+}
+
+function updateMarkdownBodyMaxWidth () {
+  markdownBodyMaxWidth.value = getMarkdownBodyMaxWidth()
+}
+
 onMounted(() => {
   nextTick(renderDebounce)
   triggerHook('VIEW_MOUNTED')
@@ -249,6 +259,8 @@ onMounted(() => {
     forUser: true
   })
 
+  registerHook('SETTING_CHANGED', updateMarkdownBodyMaxWidth)
+
   window.addEventListener('keydown', keydownHandler, true)
 })
 
@@ -260,11 +272,18 @@ onBeforeUnmount(() => {
   removeAction('view.get-content-html')
   removeAction('view.get-view-dom')
   removeAction('view.get-render-env')
+  removeHook('SETTING_CHANGED', updateMarkdownBodyMaxWidth)
   window.removeEventListener('keydown', keydownHandler, true)
 })
 
 watch([currentContent, fileUri, inComposition], () => {
-  autoPreview.value && updateRender()
+  if (autoPreview.value) {
+    if (renderCount === 0) {
+      render()
+    } else {
+      updateRender()
+    }
+  }
 }, { flush: 'post' })
 
 watch(fileUri, () => {
@@ -344,7 +363,8 @@ body.find-in-preview-highlight ::selection {
       }
     }
 
-    a:not([href^="#fn"])[href^="#"]:after {
+    a:not([href^="#fn"])[href^="#"]:after,
+    a[is-anchor]:after {
       content: '\200D\2002';
       padding: 2px;
       background-repeat: no-repeat;
@@ -362,7 +382,9 @@ body.find-in-preview-highlight ::selection {
     }
 
     a[href$=".md"],
-    a[href*=".md#"] {
+    a[href*=".md:"],
+    a[href*=".md#"],
+    a:not([is-anchor])[wiki-link] {
       &:after {
         content: '\200D\2002';
         padding: 1px;
@@ -424,7 +446,7 @@ body.find-in-preview-highlight ::selection {
 
 @media screen {
   .markdown-view  .markdown-body {
-    max-width: 1024px;
+    max-width: var(--markdown-body-max-width, 1024px);
     margin: 0 auto;
     color: var(--g-color-0);
     margin-top: 1em;

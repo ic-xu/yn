@@ -20,6 +20,7 @@ import * as extension from '@fe/others/extension'
 import { setTheme } from '@fe/services/theme'
 import { toggleOutline } from '@fe/services/workbench'
 import * as view from '@fe/services/view'
+import * as tree from '@fe/services/tree'
 import * as editor from '@fe/services/editor'
 import plugins from '@fe/plugins'
 import ctx from '@fe/context'
@@ -147,6 +148,10 @@ registerHook('SETTING_CHANGED', ({ schema, changedKeys }) => {
       }
     })
   }
+
+  if (changedKeys.includes('tree.exclude')) {
+    tree.refreshTree()
+  }
 })
 
 registerHook('EXTENSION_READY', () => {
@@ -167,7 +172,7 @@ registerHook('VIEW_BEFORE_REFRESH', async () => {
   if (store.state.currentFile) {
     logger.debug('force reload document')
     const { type, name, path, repo } = store.state.currentFile
-    await switchDoc({ type, name, path, repo }, true)
+    await switchDoc({ type, name, path, repo }, { force: true })
   }
 })
 
@@ -227,6 +232,7 @@ store.watch(() => [
   store.state.syncScroll,
   store.state.currentRepo,
   store.state.editor,
+  store.state.previewer,
 ], () => {
   ctx.workbench.ControlCenter.refresh()
   ctx.statusBar.refreshMenu()

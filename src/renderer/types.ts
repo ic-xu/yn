@@ -1,10 +1,20 @@
+import type { VNode } from 'vue'
 import type { Language, MsgPath } from '@share/i18n'
-import type { Doc, FileItem, Repo } from '@share/types'
+import type { Doc, FileItem, PathItem, Repo } from '@share/types'
 import type MarkdownIt from 'markdown-it'
 import type Token from 'markdown-it/lib/token'
 import type * as Monaco from 'monaco-editor'
 
 export * from '@share/types'
+
+export type PositionScrollState = { editorScrollTop?: number, viewScrollTop?: number }
+export type PositionState = { line: number, column?: number } | { anchor: string } | PositionScrollState
+
+export type SwitchDocOpts = {
+  force?: boolean,
+  source?: 'markdown-link' | 'history-stack',
+  position?: PositionState | null
+}
 
 export type TTitle = keyof {[K in MsgPath as `T_${K}`]: never}
 
@@ -102,6 +112,7 @@ export namespace Components {
 
     export interface InputModalParams extends BaseParams {
       type?: string;
+      maxlength?: number;
       value?: string;
       hint?: string;
       readonly?: boolean;
@@ -171,6 +182,13 @@ export namespace Components {
       children?: Node[];
       level: number;
     }
+
+    export type NodeActionBtn = {
+      id: string,
+      icon: string,
+      title: string,
+      onClick: (e: MouseEvent) => void,
+    }
   }
 
   export namespace QuickFilter {
@@ -233,7 +251,7 @@ export type Keybinding = { type: 'workbench' | 'editor' | 'application', keys: s
 
 export type PrintOpts = {
   landscape?: boolean,
-  pageSize?: string,
+  pageSize?: 'A0' | 'A1' | 'A2' | 'A3' | 'A4' | 'A5' | 'A6' | 'Legal' | 'Letter' | 'Tabloid' | 'Ledger' | { height: number, width: number }
   scaleFactor?: number,
   printBackground?: boolean,
 }
@@ -310,8 +328,9 @@ export interface BuildInSettings {
   'envs': string,
   'editor.mouse-wheel-zoom': boolean,
   'editor.font-size': number,
+  'editor.font-ligatures': boolean,
   'editor.tab-size': 2 | 4,
-  'editor.ordered-list-completion': 'auto' | 'increase' | 'one',
+  'editor.ordered-list-completion': 'auto' | 'increase' | 'one' | 'off',
   'editor.minimap': boolean,
   'editor.line-numbers': 'on' | 'off' | 'relative' | 'interval',
   'editor.enable-preview': boolean,
@@ -320,9 +339,11 @@ export interface BuildInSettings {
   'editor.todo-with-time': boolean,
   'editor.suggest-on-trigger-characters': boolean,
   'editor.quick-suggestions': boolean,
+  'editor.sticky-scroll-enabled': boolean,
   'render.md-html': boolean,
   'render.md-breaks': boolean,
   'render.md-linkify': boolean,
+  'render.md-wiki-links': boolean,
   'render.md-typographer': boolean,
   'render.md-emoji': boolean,
   'render.md-sub': boolean,
@@ -331,6 +352,7 @@ export interface BuildInSettings {
   'render.multimd-rowspan': boolean,
   'render.multimd-headerless': boolean,
   'render.multimd-multibody': boolean,
+  'view.default-previewer-max-width': number,
   'assets.path-type': 'relative' | 'absolute' | 'auto',
   'plugin.image-hosting-picgo.server-url': string,
   'plugin.image-hosting-picgo.enable-paste-image': boolean,
@@ -403,6 +425,16 @@ export type BuildInActions = {
   'plugin.electron-zoom.zoom-reset': () => void,
   'premium.show': (tab?: PremiumTab) => void,
   'base.find-in-repository': (query?: FindInRepositoryQuery) => void,
+  'base.switch-repository-1': () => void,
+  'base.switch-repository-2': () => void,
+  'base.switch-repository-3': () => void,
+  'base.switch-repository-4': () => void,
+  'base.switch-repository-5': () => void,
+  'base.switch-repository-6': () => void,
+  'base.switch-repository-7': () => void,
+  'base.switch-repository-8': () => void,
+  'base.switch-repository-9': () => void,
+  'base.switch-repository-0': () => void,
   'workbench.toggle-outline': (visible?: boolean) => void,
 }
 
@@ -456,15 +488,16 @@ export type BuildInHookTypes = {
   EDITOR_CURRENT_EDITOR_CHANGE: { current?: CustomEditor | null },
   EDITOR_CONTENT_CHANGE: { uri: string, value: string },
   DOC_CREATED: { doc: Doc },
-  DOC_DELETED: { doc: Doc },
+  DOC_DELETED: { doc: PathItem },
   DOC_MOVED: { oldDoc: Doc, newDoc: Doc },
-  DOC_PRE_SWITCH: { doc?: Doc | null },
+  DOC_PRE_SWITCH: { doc?: Doc | null, opts?: SwitchDocOpts },
   DOC_BEFORE_SAVE: { doc: Doc, content: string },
   DOC_SAVED: { doc: Doc },
-  DOC_BEFORE_SWITCH: { doc?: Doc | null },
-  DOC_SWITCHING: { doc?: Doc | null },
-  DOC_SWITCHED: { doc: Doc | null },
-  DOC_SWITCH_FAILED: { doc?: Doc | null, message: string },
+  DOC_BEFORE_SWITCH: { doc?: Doc | null, opts?: SwitchDocOpts },
+  DOC_SWITCHING: { doc?: Doc | null, opts?: SwitchDocOpts },
+  DOC_SWITCHED: { doc: Doc | null, opts?: SwitchDocOpts },
+  DOC_SWITCH_FAILED: { doc?: Doc | null, message: string, opts?: SwitchDocOpts },
+  DOC_SWITCH_SKIPPED: { doc?: Doc | null, opts?: SwitchDocOpts },
   DOC_CHANGED: { doc: Doc },
   DOC_PRE_ENSURE_CURRENT_FILE_SAVED: never,
   I18N_CHANGE_LANGUAGE: { lang: LanguageName, currentLang: Language },
@@ -502,15 +535,39 @@ export type CustomEditor = {
   getIsDirty?: () => boolean | Promise<boolean>,
 }
 
+export type Renderer = {
+  name: string,
+  order?: number,
+  when: (env: RenderEnv) => boolean | Promise<boolean>,
+  render (src: string, env: RenderEnv): string | VNode | VNode[]
+}
+
+type BuildNewContentResult = string | Blob | { base64Content: string }
+
+export type DocType = {
+  id: string,
+  extension: [string, ...string[]],
+  displayName: string,
+  plain?: boolean,
+  buildNewContent?: (filename: string) => Promise<BuildNewContentResult> | BuildNewContentResult,
+}
+
+export type DocCategory = {
+  category: string,
+  displayName: string,
+  types: DocType[],
+}
+
 export interface CodeRunner {
   name: string;
   order?: number;
+  nonInterruptible?: boolean
   match: (language: string, magicComment: string) => boolean;
   getTerminalCmd: (language: string, magicComment: string) => {
     start: string,
     exit: string,
   } | null;
-  run: (language: string, code: string) => Promise<{
+  run: (language: string, code: string, opts?: { signal?: AbortSignal }) => Promise<{
     type: 'html' | 'plain',
     value: ReadableStreamDefaultReader | string,
   }>;
@@ -527,7 +584,10 @@ export type BuildInIOCTypes = { [key in keyof BuildInHookTypes]: any; } & {
   THEME_STYLES: any;
   VIEW_PREVIEWER: Previewer;
   EDITOR_CUSTOM_EDITOR: CustomEditor,
+  RENDERERS: Renderer,
   CODE_RUNNER: CodeRunner;
+  DOC_CATEGORIES: DocCategory;
+  TREE_NODE_ACTION_BTN_TAPPERS: (btns: Components.Tree.NodeActionBtn[], currentNode: Components.Tree.Node) => void;
 }
 
 export type FrontMatterAttrs = {

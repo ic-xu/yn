@@ -11,6 +11,7 @@ const data = {
   'demo-tips': 'Some features are not available in DEMO mode.',
   'more': 'More',
   'copied': 'Copied',
+  'others': 'Others',
   'insert-different-repo-doc': 'Documents from different repository cannot be inserted',
   'need-clipboard-permission': 'Please grant clipboard permissions',
   'click-to-copy': 'Click to copy',
@@ -36,6 +37,14 @@ const data = {
   'learn-more': 'Learn More',
   'default': 'Default',
   'print': 'Print',
+  'markdown-file': 'Markdown File',
+  'encrypted-markdown-file': 'Encrypted Markdown File',
+  'switch-repo-n': 'Switch to the repository [%s]',
+  'switch-the-last-repo': 'Switch to the last repository',
+  'edit-or-generate-text-using-ai': 'Edit or generate text using AI',
+  'file-readonly-desc': 'The file is read-only. You can [change to writable](%s) in the system and then [refresh](%s) the document to edit.',
+  'can-not-edit-this-file-type': 'Cannot edit this file type',
+  'read-only-mode-desc': 'The application is currently in read-only mode and cannot be edited.',
   'premium': {
     'confetti': 'Confetti',
     'need-purchase': '[%s] Premium is required',
@@ -177,13 +186,15 @@ const data = {
   },
   'document': {
     'current-path': 'Current Path: %s',
+    'invalid-filename': 'File name cannot contain the following characters: %s',
     'password-create': '[Create] Please enter a password',
     'password-save': '[Save] Please enter password of the file',
     'password-open': '[Open] Please enter password of the file',
     'wrong-password': 'Wrong Password',
     'file-transform-error': 'Encrypted and unencrypted files cannot be converted to each other',
+    'custom-extension': 'Custom Extension',
     'create-dialog': {
-      'title': 'Create a file (encrypted file ends with .c.md)',
+      'title': 'Create a file',
       'hint': 'File name',
     },
     'create-dir-dialog': {
@@ -230,6 +241,7 @@ const data = {
     'nav': {
       'nav': 'Navigation',
       'goto': 'Goto',
+      'reveal-current-file-in-sidebar': 'Reveal Current File in Sidebar',
       'forward': 'Forward',
       'back': 'Back',
     },
@@ -383,15 +395,18 @@ const data = {
         'line-numbers': 'Line Numbers',
         'enable-preview': 'Enable Preview - Open new files using temporary tabs, double click the tab to change',
         'font-family': 'Font Family',
+        'font-ligatures': 'Font Ligatures',
         'complete-emoji': 'Complete Emoji - Input : to display emoji list',
         'todo-with-time': 'Add time when checking todo',
         'suggest-on-trigger-characters': 'Suggest on trigger characters - You can also use Ctrl+Space (depending on the shortcuts) to trigger',
+        'sticky-scroll-enabled': 'Enable Sticky Scroll - When the editor scrolls, the document title is fixed',
         'quick-suggestions': 'Quick Suggestions - Suggest as you type',
       },
       'render': {
         'md-html': 'Enable HTML',
         'md-breaks': 'Convert \\n to &lt;br&gt;',
         'md-linkify': 'Auto convert URL-like text to links',
+        'md-wiki-links': 'Enable Wiki Links - [[link]]',
         'md-typographer': 'Enable some language-neutral replacement + quotes beautification',
         'md-sup': 'Enable sup syntax: 29^th^',
         'md-sub': 'Enable sub syntax: H~2~O',
@@ -400,6 +415,10 @@ const data = {
         'multimd-rowspan': '[markdown-it-multimd-table]: Enable rowspan syntax',
         'multimd-headerless': '[markdown-it-multimd-table]: Enable headerless syntax',
         'multimd-multibody': '[markdown-it-multimd-table]: Enable multibody syntax',
+      },
+      'view': {
+        'default-previewer-max-width': 'Previewer Max Width',
+        'default-previewer-max-width-desc': '≤ 100 means percentage, > 100 means pixels',
       },
       'theme': 'Theme',
       'language': 'Language',
@@ -470,6 +489,10 @@ const data = {
     },
     'switch-editor': 'Switch Editor',
     'default-editor': 'Default Editor',
+    'action-label': {
+      'reveal-current-file-in-os': 'Reveal Current File in OS',
+      'refresh-current-document': 'Refresh Current Document',
+    },
   },
   'previewer': {
     'default-previewer': 'Default Previewer',
@@ -489,6 +512,7 @@ const data = {
   },
   'code-run': {
     'run': 'Run',
+    'stop': 'Stop',
     'run-in-xterm-tips': 'Run code in terminal, %s + click do not exit',
     'run-in-xterm': 'Run in terminal',
     'running': 'Running...',
@@ -736,6 +760,11 @@ const data = {
     },
     'results': '%s matches',
     'toast-no-more': 'No more matches',
+  },
+  'view-context-menu': {
+    'copy-image': 'Copy Image',
+    'delete-image': 'Delete Image',
+    'open-in-new-tab': 'Open in New Tab',
   },
 }
 

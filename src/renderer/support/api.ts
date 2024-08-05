@@ -1,7 +1,7 @@
 import type { Stats } from 'fs'
 import type { WatchOptions } from 'chokidar'
 import type { IProgressMessage, ISerializedFileMatch, ISerializedSearchSuccess, ITextQuery } from 'ripgrep-wrapper'
-import type { Components, Doc, ExportType, FileItem, FileSort, FileStat, PathItem } from '@fe/types'
+import type { Components, Doc, ExportType, FileItem, FileReadResult, FileSort, FileStat, PathItem } from '@fe/types'
 import { isElectron } from '@fe/support/env'
 import { HELP_REPO_NAME, JWT_TOKEN } from './args'
 
@@ -43,29 +43,58 @@ export async function fetchHttp (input: RequestInfo, init?: RequestInit) {
 }
 
 /**
- * Proxy request.
- * @param url URL
- * @param reqOptions
- * @param usePost
+ * Proxy fetch.
+ * @param url RequestInfo | URL
+ * @param init RequestInit
  * @returns
  */
-export async function proxyRequest (url: string, reqOptions: Record<string, any> = {}, usePost = false) {
-  let res: Response
-  if (usePost) {
-    res = await fetch('/api/proxy', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
-      body: JSON.stringify({
-        url,
-        options: reqOptions
-      })
-    })
-  } else {
-    const options = encodeURIComponent(JSON.stringify(reqOptions))
-    res = await fetch(`/api/proxy?url=${encodeURIComponent(url)}&options=${options}`, {
-      headers: getAuthHeader()
-    })
+export async function proxyFetch (url: RequestInfo | URL, init?: Omit<RequestInit, 'body'> & {
+  body?: any,
+  timeout?: number,
+  proxy?: string,
+  jsonBody?: boolean,
+}) {
+  if (!url) {
+    throw new Error('url is required')
   }
+
+  const _init: typeof init = { ...init }
+  let _headers = init?.headers
+  let _url: RequestInfo | URL
+
+  const prefix = '/api/proxy-fetch/'
+
+  if (typeof url === 'string') {
+    _url = `${prefix}${url}`
+  } else if ('href' in url) { // same as URL. we do not use instanceof URL because of the compatibility with cross iframe
+    _url = new URL(`${prefix}${url.href}`)
+  } else { // Request
+    _url = new Request(`${prefix}${(url as Request).url}`, url)
+    _headers = _url.headers
+  }
+
+  const headers = new Headers(_headers)
+
+  if (typeof _init.timeout === 'number') {
+    headers.set('x-proxy-timeout', String(_init.timeout))
+  }
+
+  if (_init.proxy) {
+    headers.set('x-proxy-url', _init.proxy)
+  }
+
+  if (_init.redirect === 'error' || _init.redirect === 'manual') {
+    headers.set('x-proxy-max-redirections', '0')
+  }
+
+  if (_init.jsonBody) {
+    headers.set('Content-Type', 'application/json')
+    _init.body = JSON.stringify(_init.body)
+  }
+
+  headers.set('x-yn-authorization', 'Bearer ' + JWT_TOKEN)
+
+  const res: Response = await fetch(_url, { ..._init, headers })
 
   if (res.headers.get('x-yank-note-api-status') === 'error') {
     const msg = res.headers.get('x-yank-note-api-message') || 'error'
@@ -82,7 +111,7 @@ export async function proxyRequest (url: string, reqOptions: Record<string, any>
  */
 async function fetchHelpContent (docName: string) {
   const result = await fetchHttp('/api/help?doc=' + docName)
-  return { content: result.data.content, hash: '', stat: { mtime: 0, birthtime: 0, size: 0 } }
+  return { content: result.data.content, hash: '', stat: { mtime: 0, birthtime: 0, size: 0 }, writeable: true }
 }
 
 /**
@@ -91,7 +120,7 @@ async function fetchHelpContent (docName: string) {
  * @param asBase64
  * @returns
  */
-export async function readFile (file: PathItem, asBase64 = false): Promise<{content: string, hash: string, stat: FileStat}> {
+export async function readFile (file: PathItem, asBase64 = false): Promise<FileReadResult> {
   const { path, repo } = file
 
   if (repo === HELP_REPO_NAME) {
@@ -157,7 +186,7 @@ export async function copyFile (file: FileItem, newPath: string): Promise<ApiRes
  * @param file
  * @returns
  */
-export async function deleteFile (file: FileItem): Promise<ApiResult<any>> {
+export async function deleteFile (file: PathItem): Promise<ApiResult<any>> {
   const { path, repo } = file
   return fetchHttp(`/api/file?path=${encodeURIComponent(path)}&repo=${encodeURIComponent(repo)}`, { method: 'DELETE' })
 }
@@ -324,16 +353,16 @@ export async function search (controller: AbortController, query: ITextQuery): P
 }
 
 /**
- * Watch a file.
+ * Watch file or dir.
  * @param controller
  * @param query
  * @returns
  */
-export async function watchFile (
+export async function watchFs (
   repo: string,
   path: string,
   options: WatchOptions,
-  onResult: (result: { eventName: 'add' | 'change' | 'unlink', path: string, stats?: Stats }) => void,
+  onResult: (result: { eventName: 'add' | 'change' | 'unlink' | 'addDir' | 'unlinkDir', path: string, stats?: Stats }) => void,
   onError: (error: Error) => void
 ) {
   const controller: AbortController = new AbortController()
@@ -469,17 +498,21 @@ export async function convertFile (
  * Run code.
  * @param cmd
  * @param code
- * @param outputStream
+ * @param opts
  * @returns result
  */
-export async function runCode (cmd: string | { cmd: string, args: string[] }, code: string, outputStream: true): Promise<ReadableStreamDefaultReader>
-export async function runCode (cmd: string | { cmd: string, args: string[] }, code: string, outputStream?: false): Promise<string>
-export async function runCode (cmd: string | { cmd: string, args: string[] }, code: string, outputStream = false): Promise<ReadableStreamDefaultReader | string> {
+export async function runCode (cmd: string | { cmd: string, args: string[] }, code: string, opts?: { stream?: boolean, signal?: AbortSignal }): Promise<ReadableStreamDefaultReader>
+export async function runCode (cmd: string | { cmd: string, args: string[] }, code: string, opts?: { stream?: boolean, signal?: AbortSignal }): Promise<string>
+export async function runCode (cmd: string | { cmd: string, args: string[] }, code: string, opts?: { stream?: boolean, signal?: AbortSignal }): Promise<ReadableStreamDefaultReader | string> {
   const response = await fetchHttp('/api/run', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ cmd, code })
+    body: JSON.stringify({ cmd, code }),
+    signal: opts?.signal
   })
+
+  // compatible with old version
+  const outputStream = typeof opts === 'boolean' ? opts : opts?.stream
 
   if (outputStream) {
     return response.body.getReader()
