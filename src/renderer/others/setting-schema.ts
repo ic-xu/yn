@@ -71,7 +71,7 @@ const schema: SettingSchema = ({
       required: true,
     },
     'view.default-previewer-max-width': {
-      defaultValue: 1024,
+      defaultValue: 90,
       title: 'T_setting-panel.schema.view.default-previewer-max-width',
       type: 'number',
       format: 'number',
