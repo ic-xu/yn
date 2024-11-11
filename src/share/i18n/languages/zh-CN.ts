@@ -272,6 +272,7 @@ const data: BaseLanguage = {
       'readme': '应用介绍',
       'features': '特色功能说明',
       'shortcuts': '快捷键',
+      'guide': '使用指引',
       'plugin': '插件开发'
     },
     'terminal': '终端',
@@ -392,6 +393,7 @@ const data: BaseLanguage = {
         'suggest-on-trigger-characters': '自动提示 - 输入提示符时显示提示。如果禁用，仍可使用 Ctrl+Space (取决于快捷键配置) 触发',
         'sticky-scroll-enabled': '启用粘性滚动 - 当编辑器滚动时，固定显示文档标题等',
         'quick-suggestions': '快速提示 - 在输入文本时显示提示',
+        'enable-ai-copilot-action': '启用 AI Copilot 操作 - 当可用时显示 AI Copilot 操作灯泡',
       },
       'render': {
         'md-html': '启用 HTML',
@@ -415,7 +417,7 @@ const data: BaseLanguage = {
       'language': '语言',
       'custom-css': '自定义 CSS',
       'assets-dir': '图片存放目录',
-      'assets-desc': '支持相对路径和绝对路径（限于仓库内部）,可用变量：docName, docBasename, docSlug, date',
+      'assets-desc': '支持相对路径和绝对路径（限于仓库内部）,可用变量：docName, docBasename, docSlug, docHash, date',
       'assets': {
         'path-type': '路径类型',
       },

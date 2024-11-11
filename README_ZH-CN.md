@@ -4,7 +4,7 @@
 
 [![Download](./help/mas_en.svg?.inline)](https://apps.apple.com/cn/app/yank-note/id1551528618) [Mac App Store 版本说明](https://github.com/purocean/yn/issues/65#issuecomment-1065799677)
 
-[English](./README.md) | 中文说明
+[English](./README.md) | 中文说明 | [Русский](./README_RU.md)
 
 [toc]{level: [2]}
 
@@ -76,16 +76,11 @@
 
 ## 更新日志
 
-### [v3.75.1](https://github.com/purocean/yn/releases/tag/v3.75.1) 2024-07-23
+### [v3.76.2](https://github.com/purocean/yn/releases/tag/v3.76.2) 2024-09-14
 
-[Windows](https://github.com/purocean/yn/releases/download/v3.75.1/Yank-Note-win-x64-3.75.1.exe) | [macOS arm64](https://github.com/purocean/yn/releases/download/v3.75.1/Yank-Note-mac-arm64-3.75.1.dmg) | [macOS x64](https://github.com/purocean/yn/releases/download/v3.75.1/Yank-Note-mac-x64-3.75.1.dmg) | [Linux AppImage](https://github.com/purocean/yn/releases/download/v3.75.1/Yank-Note-linux-x86_64-3.75.1.AppImage) | [Linux deb](https://github.com/purocean/yn/releases/download/v3.75.1/Yank-Note-linux-amd64-3.75.1.deb)
+[Windows](https://github.com/purocean/yn/releases/download/v3.76.2/Yank-Note-win-x64-3.76.2.exe) | [macOS arm64](https://github.com/purocean/yn/releases/download/v3.76.2/Yank-Note-mac-arm64-3.76.2.dmg) | [macOS x64](https://github.com/purocean/yn/releases/download/v3.76.2/Yank-Note-mac-x64-3.76.2.dmg) | [Linux AppImage](https://github.com/purocean/yn/releases/download/v3.76.2/Yank-Note-linux-x86_64-3.76.2.AppImage) | [Linux deb](https://github.com/purocean/yn/releases/download/v3.76.2/Yank-Note-linux-amd64-3.76.2.deb)
 
-1. feat: 创建文件面板增加创建自定义扩展名选项
-2. feat: 支持编辑 `.gitignore` 文件
-3. feat: 支持粘贴 webp 图片
-4. feat: 体验优化，增加只读文件编辑提示
-5. feat: 体验优化，调整“重复文件”菜单位置
-6. fix(plugin): 修复 `ctx.api.proxyFetch` 对 `Request` 对象的处理
+1. fix: 修复 PlantUML 渲染不正确问题
 
 [更多发布说明](https://github.com/purocean/yn/releases)
 

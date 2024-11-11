@@ -271,6 +271,7 @@ const data = {
       'readme': 'Introduction',
       'features': 'Features',
       'shortcuts': 'Shortcuts',
+      'guide': 'Guide',
       'plugin': 'Create Plugin'
     },
     'terminal': 'Terminal',
@@ -401,6 +402,7 @@ const data = {
         'suggest-on-trigger-characters': 'Suggest on trigger characters - You can also use Ctrl+Space (depending on the shortcuts) to trigger',
         'sticky-scroll-enabled': 'Enable Sticky Scroll - When the editor scrolls, the document title is fixed',
         'quick-suggestions': 'Quick Suggestions - Suggest as you type',
+        'enable-ai-copilot-action': 'Enable the AI Copilot Action - Show the AI Copilot Action lightbulb when available',
       },
       'render': {
         'md-html': 'Enable HTML',
@@ -424,7 +426,7 @@ const data = {
       'language': 'Language',
       'custom-css': 'Custom CSS',
       'assets-dir': 'Image Dir',
-      'assets-desc': 'Relative or absolute path (in document repository). Variables: docName, docBasename, docSlug, date.',
+      'assets-desc': 'Relative or absolute path (in document repository). Variables: docName, docBasename, docSlug, docHash, date.',
       'assets': {
         'path-type': 'Path Type',
       },
